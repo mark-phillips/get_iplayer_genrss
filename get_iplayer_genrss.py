@@ -136,10 +136,24 @@ outputFile.write("<copyright>www.stuffaboutcode.com (2012)</copyright>\n")
 outputFile.write("<lastBuildDate>" + formatDate(now) + "</lastBuildDate>\n")
 outputFile.write("<pubDate>" + formatDate(now) + "</pubDate>\n")
 outputFile.write("<webMaster>" + rssWebMaster + "</webMaster>\n")
+unfinishedLine = None
 
 # go through the download history 
 for download in downloadHistory:
+
+	# If the previous line was not terminated properly (see below) then prepend it to this one.
+	if unfinishedLine != None:
+		download = unfinishedLine + download
+		unfinishedLine = None
+	#end if
 	
+	# If line does not end in "|" save it and join it to the next line in the file (this is to 
+	# handle cases where the podcast description is split over multiple lines in the history file).
+	if download.rstrip()[-1] != "|":
+		unfinishedLine = download
+		continue
+	#end if
+
 	# split download history into data
 	downloadData = download.split("|")
 
