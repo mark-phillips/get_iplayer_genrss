@@ -66,6 +66,7 @@ parser.add_argument("rssImageURL", help="URL of the rss image")
 parser.add_argument("rssTTL", help="Time to live in minutes for the rss feed e.g 60 minutes")
 parser.add_argument("rssWebMaster", help="RSS feed web master contact details e.g. me@me.com")
 parser.add_argument("-a", "--altDownloadDir", help="An alternative download directory as apposed to that in the download_history, useful if the downloads have been copied to another location; specify multiple by seperating with a comma /path1,path2")
+parser.add_argument("-I", "--includeFilter", help="only include a podcast if this name filter string appears in the podcast name")
 parser.add_argument("-m", "--mediaType", help="Filter by get_iplayer media type (tv,radio) ; specify multile values by seperating with a comma tv,radio")
 parser.add_argument("-v", "--verbose", action="store_true", help="Output verbose statements")
 args = parser.parse_args()
@@ -81,6 +82,7 @@ if args.verbose:
 	print "  RssImageURL - " + args.rssImageURL
 	print "  RssTTL - " + args.rssTTL
 	print "  RssWebMaster = " + args.rssWebMaster
+	if args.includeFilter != None: print "  includeFilter = " + args.includeFilter
 	if args.altDownloadDir != None: print "  AltDownloadDir = " + args.altDownloadDir
 	if args.mediaType != None: print "  MediaType = " + args.mediaType
 
@@ -153,6 +155,14 @@ for download in downloadHistory:
 	downloadDate = datetime.datetime.fromtimestamp(int(downloadData[dhTimeAdded]))
 	if downloadDate > fromDate:
 		includeDownload = True
+	#end if
+
+	# Check whether this download should be included due to name mask 
+	if includeDownload == True:
+		if args.includeFilter != None and args.includeFilter not in downloadData[dhName]:
+			includeDownload = False
+			if args.verbose: print "Warning: file '" + downloadData[dhName] + "' excluded because it does not match include filter"
+		#end if
 	#end if
 
 	if includeDownload == True:
